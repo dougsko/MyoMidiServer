@@ -1,0 +1,29 @@
+#!/usr/bin/env ruby
+
+require './lib/MyoMidiServer'
+require 'micromidi'
+
+srv = MyoMidiServer.new( 6969, 1, false )
+output = UniMIDI::Output.use(:first)
+midi = MIDI::IO.new(output)
+
+def convert(num)
+	old_value = num.to_f
+	old_min = 0
+	old_max = 255
+	new_max = 50
+	new_min = 20
+	(( (old_value - old_min) / (old_max - old_min) ) * (new_max - new_min) + new_min).to_i
+end
+
+loop do
+    if sock = srv.get_socket
+        # a message has arrived, it must be read from sock
+        message = sock.gets("\r\n").chomp("\r\n")
+		if message.match(/orient: (\d+)/)
+			midi.note(convert($1))
+			sleep 0.25
+			midi.note_off(convert($1))
+		end
+    end
+end

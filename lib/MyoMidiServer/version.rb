@@ -1,0 +1,3 @@
+module MyoMidiServer
+  VERSION = "0.0.1"
+end
