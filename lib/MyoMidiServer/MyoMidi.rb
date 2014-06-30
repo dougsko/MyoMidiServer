@@ -1,25 +1,32 @@
 require 'micromidi'
+require 'json'
 
 class MyoMidi   
     def initialize
         @output = UniMIDI::Output.use(:first)
-        @midi = MIDI::IO.new(output)
+        @midi = MIDI::IO.new(@output)
     end
     
     # orient: 40, 41, 42
     # accel: 43, 44, 45
     # diff: 46, 47, 48
     # world: 49
-    def process_event(event)
+    def process_event(event_text)
+        event = JSON.parse(event_text)
+
         if(event.type == 'control')
-            if(event.command == 'allOff'
-                all_off
+            if(event.command == 'allOff')
+                puts 'all off'
+                #all_off
             end
-        end
-        if(event.type == 'orient')
-            cc(40, convert(event.values[0]))
-            cc(41, convert(event.values[1]))
-            cc(42, convert(event.values[2]))
+        elsif(event.type == 'orient')
+            puts 'orient'
+            #cc(40, convert(event.values[0]))
+            #cc(41, convert(event.values[1]))
+            #cc(42, convert(event.values[2]))
+        else
+            puts 'other'
+            puts event.inspect
         end
     end
     
