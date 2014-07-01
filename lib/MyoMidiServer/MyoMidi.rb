@@ -7,6 +7,7 @@ class MyoMidi
         @pose_time = 0
         @prev_event
         @current_event
+        @long_hold = 2
     end
     
     # orient: 40, 41, 42
@@ -16,6 +17,8 @@ class MyoMidi
     def process_event(event_text)
         @prev_event = @current_event
         @current_event = MyoEvent.new(event_text)
+
+        # set pose time
         if(@prev_event != nil and @current_event != nil)
             if(@prev_event.pose == @current_event.pose)
                 @pose_time += @current_event.timeStamp.to_i - @prev_event.timeStamp.to_i
@@ -24,6 +27,10 @@ class MyoMidi
                 @pose_time = 0
             end
         end
+        if(@pose_time > @long_hold)
+            puts "long #{@current_event.pose} detected"
+        end
+
         #puts @current_event.inspect
     end
     
