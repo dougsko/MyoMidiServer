@@ -8,6 +8,7 @@ class MyoMidi
         @prev_event
         @current_event
         @long_hold = 2
+        @locked = false
     end
     
     # orient: 40, 41, 42
@@ -27,20 +28,44 @@ class MyoMidi
                 @pose_time = 0
             end
         end
+
+        # handle long poses
         if(@pose_time > @long_hold)
-            puts "long #{@current_event.pose} detected"
+            case @current_event.pose
+            when "fist"
+                puts "long #{@current_event.pose} detected"
+                all_off
+            when "twistIn"
+                @locked = not(@locked)
+                if(@locked)
+                    puts "Locked!"
+                else
+                    puts "Unlocked!"
+                end
+            else
+                puts "long #{@current_event.pose} detected"
+            end
+        end
+
+        if(@locked)
+            return
+        end
+        
+        case @current_event.pose
+        when "fingersSpread"
+            val1 = remap(@current_event.diffData[0].to_f, 0, 1, 0, 127)
+            val1 = remap(@current_event.diffData[1].to_f, 0, 1, 0, 127)
+            cc(41, val1)
+            cc(42, val2)
         end
 
         #puts @current_event.inspect
     end
     
-    def convert(num)
-        old_value = num.to_f
-        old_min = 0
-        old_max = 255
-        new_max = 50
-        new_min = 20
-        (((old_value - old_min) / (old_max - old_min) ) * (new_max - new_min) + new_min).to_i
+    # low1 = 0, high1 = 1
+    # low2 = 0, high2 = 127
+    def remap(value, low1, high1, low2, high2)
+        (low2 + (value - low1) * (high2 - low2) / (high1 - low1)).to_i
     end
     
     def cc(channel, value)
