@@ -1,10 +1,12 @@
 require 'micromidi'
-require 'json'
 
 class MyoMidi   
     def initialize
         @output = UniMIDI::Output.use(:first)
         @midi = MIDI::IO.new(@output)
+        @pose_time = 0
+        @prev_event
+        @current_event
     end
     
     # orient: 40, 41, 42
@@ -12,22 +14,17 @@ class MyoMidi
     # diff: 46, 47, 48
     # world: 49
     def process_event(event_text)
-        event = JSON.parse(event_text)
-
-        if(event.type == 'control')
-            if(event.command == 'allOff')
-                puts 'all off'
-                #all_off
+        @prev_event = @current_event
+        @current_event = MyoEvent.new(event_text)
+        if(@prev_event != nil and @current_event != nil)
+            if(@prev_event.pose == @current_event.pose)
+                @pose_time += @current_event.timeStamp.to_i - @prev_event.timeStamp.to_i
+                puts @pose_time.to_s
+            else
+                @pose_time = 0
             end
-        elsif(event.type == 'orient')
-            puts 'orient'
-            #cc(40, convert(event.values[0]))
-            #cc(41, convert(event.values[1]))
-            #cc(42, convert(event.values[2]))
-        else
-            puts 'other'
-            puts event.inspect
         end
+        #puts @current_event.inspect
     end
     
     def convert(num)

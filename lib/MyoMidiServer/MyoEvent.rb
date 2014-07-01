@@ -1,9 +1,17 @@
+require 'json'
+
 class MyoEvent
-    attr_accessor :type, :values, :command
+    attr_accessor :pose, :orientData, :accelData, :diffData, :worldData, 
+        :gyroData, :timeStamp
     
-    def initialize
-        @type
-        @values
-        @command
+    def initialize(event_text)
+        event = JSON.parse(event_text) rescue {}
+        @pose = event['pose']
+        @orientData = event['orientData']
+        @accelData = event['accelData']
+        @diffData = event['diffData']
+        @worldData = event['worldData']
+        @gyroData = event['gyroData']
+        @timeStamp = event['timeStamp'].first rescue []
     end   
 end

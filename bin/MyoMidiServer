@@ -5,15 +5,8 @@ require './lib/MyoMidiServer.rb'
 
 myo_midi = MyoMidi.new
 
-=begin
-MyoMidiServer.start_server(6969, 1, false) do |mess|
-    me = YAML.load(mess)
-    myo_midi.process_event(me)
-end
-=end
-
 EventMachine::run {
-    EventMachine::start_server "0.0.0.0", 6969, MyoServer
+    EventMachine::start_server "0.0.0.0", 6969, MyoServer, myo_midi
     puts 'running echo server on 6969'
 }
 
